@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+  # Mongo
+  mongo:
+    image: mongo:latest
+    restart: always
+    networks:
+      - db-net
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_USER
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_PASSWORD
+      MONGO_INITDB_DATABASES: $MONGO_DATABASES
+    volumes:
+      - ./mongo-initdb.d:/docker-entrypoint-initdb.d:ro
+      - mongo-db:/data:db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    networks:
+      - db-net
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: $MONGO_USER
+      ME_CONFIG_MONGODB_ADMINPASSWORD: $MONGO_PASSWORD
+      ME_CONFIG_MONGODB_URL: mongodb://$MONGO_USER:$MONGO_PASSWORD@mongo:27017/
+
+  # PostgreSQL
+  postgres:
+    image: "postgres:11.5-alpine"
+    ports:
+      - 5432:5432
+    networks:
+      - db-net
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_MULTIPLE_DATABASES: $POSTGRES_DATABASES
+    volumes:
+      - ./postgres-initdb.d:/docker-entrypoint-initdb.d:ro
+      - postgres-db:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - db-net
+
+networks:
+  db-net:
+    name: db-net
+   
+
+volumes:
+  mongo-db:
+  postgres-db:
