@@ -7,17 +7,10 @@ function create_user_and_database() {
 	local database=$1
 	echo "  Creating user and database '$database'"
 	psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-	BEGIN
-		IF NOT EXISTS(
-			SELECT FROM pg_catalog.pg_roles
-			WHERE rolname = $database) THEN
-
-	    	CREATE USER $database;
-	    	CREATE DATABASE $database;
-	    	GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
-		END IF;
-	END
-EOSQL
+		CREATE USER $database WITH PASSWORD '$POSTGRES_PASSWORD';
+		CREATE DATABASE $database;
+		GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
+	EOSQL
 }
 
 if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
