@@ -16,6 +16,7 @@ services:
     volumes:
       - ./mongo-initdb.d:/docker-entrypoint-initdb.d:ro
       - mongo-db:/data:db
+    command: [--auth]
 
   mongo-express:
     image: mongo-express
